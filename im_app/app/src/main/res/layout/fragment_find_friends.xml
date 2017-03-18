@@ -2,18 +2,19 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="cz.vspj.schrek.im.fragment.friends.FriendsListFragment">
+                tools:context="cz.vspj.schrek.im.fragment.friends.FindFriendsFragment">
 
-    <Button android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="vyhledat přátele"
-            android:id="@+id/findFriends"
+    <EditText android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/searchInput"
+              android:hint="email"
     />
+
 
     <ListView android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:id="@+id/friendList"
-              android:layout_below="@id/findFriends"
+              android:id="@+id/resultList"
+              android:layout_below="@id/searchInput"
               android:divider="#82cfcfcf"
               android:dividerHeight="1dp"
 
@@ -24,7 +25,7 @@
               android:id="@+id/notFoundLabel"
               android:layout_centerInParent="true"
               android:textAlignment="center"
-              android:text="Zadni pratele"
+              android:text="Nic nenalezeno"
               android:visibility="gone"
 
     />

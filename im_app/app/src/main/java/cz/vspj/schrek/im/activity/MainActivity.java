@@ -4,9 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -14,9 +15,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import cz.vspj.schrek.im.R;
+import cz.vspj.schrek.im.common.LoggedUser;
+import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
+import cz.vspj.schrek.im.model.User;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -29,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (user == null) {
                 startActivity(new Intent(getApplicationContext(), LoginAcitivty.class));
                 finish();
+            } else {
+                LoggedUser.setCurrentUser(new User(user.getUid(), user.getEmail()));
             }
         }
     };
@@ -103,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_messages) {
             // Handle the camera action
         } else if (id == R.id.nav_friends) {
-
+           replaceFragment(new FriendsListFragment());
         } else if (id == R.id.nav_subscribes) {
 
         } else if (id == R.id.nav_settings) {
@@ -115,6 +122,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    public void replaceFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frameView, fragment);
+        transaction.commit();
+    }
+
+    public void pushFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frameView, fragment);
+        transaction.addToBackStack(fragment.getTag());
+        transaction.commit();
+    }
 
     @Override
     protected void onStart() {
