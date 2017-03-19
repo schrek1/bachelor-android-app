@@ -17,6 +17,10 @@ public class User {
         this.username = username;
     }
 
+    public String getName() {
+        return username.split("@")[0];
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -28,9 +32,9 @@ public class User {
     @Override
     public boolean equals(Object obj) {
         User user = (User) obj;
-        if(user.uid.equals(uid)){
+        if (user.uid.equals(uid)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

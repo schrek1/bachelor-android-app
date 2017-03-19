@@ -5,11 +5,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
 import cz.vspj.schrek.im.common.LoggedUser;
+import cz.vspj.schrek.im.common.Utils;
 import cz.vspj.schrek.im.fragment.friends.adapter.FriendsAdapter;
 import cz.vspj.schrek.im.model.User;
 
@@ -18,17 +20,17 @@ import java.util.List;
 
 public class FriendsListFragment extends Fragment implements LoggedUser.FriendChangeListener {
 
-    private MainActivity mainActivity;
-
     private TextView emptyLabel;
+
     private ListView listView;
+    private FriendsAdapter adapter;
+    private List<User> friends;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mainActivity = (MainActivity) getActivity();
-        mainActivity.getSupportActionBar().setTitle("Pratele");
+
     }
 
     @Override
@@ -38,15 +40,17 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
         view.findViewById(R.id.findFriends).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.pushFragment(new FindFriendsFragment());
+                ((MainActivity) getActivity()).pushFragment(new FindFriendsFragment());
             }
         });
 
-        listView = (ListView) view.findViewById(R.id.friendList);
-        emptyLabel = (TextView) view.findViewById(R.id.notFoundLabel);
+        view.findViewById(R.id.findFriends).setOnTouchListener(Utils.getViewClickEffect());
 
-        List<User> friends = LoggedUser.getFriends();
-        fillUserList(friends);
+        emptyLabel = (TextView) view.findViewById(R.id.notFoundLabel);
+        listView = (ListView) view.findViewById(R.id.friendList);
+
+
+        fillUserList(LoggedUser.getFriends());
 
 
         return view;
@@ -55,7 +59,8 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
     private void fillUserList(List<User> friends) {
         if (!friends.isEmpty()) {
             emptyLabel.setVisibility(View.GONE);
-            final FriendsAdapter adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, friends, false);
+            this.friends = friends;
+            adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, friends, false);
             listView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         } else {
@@ -71,6 +76,7 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Pratele");
         LoggedUser.addFriendChangeListener(this);
     }
 

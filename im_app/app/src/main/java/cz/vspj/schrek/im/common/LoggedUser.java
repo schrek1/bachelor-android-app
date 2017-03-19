@@ -111,19 +111,9 @@ public class LoggedUser {
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
-        }
+        };
 
-        ;
-
-        database.child("app").
-
-                child("users").
-
-                child(user.uid).
-
-                child("friends").
-
-                addChildEventListener(databaseFriendsListener);
+        database.child("app").child("users").child(user.uid).child("friends").addChildEventListener(databaseFriendsListener);
     }
 
     public interface FriendChangeListener {

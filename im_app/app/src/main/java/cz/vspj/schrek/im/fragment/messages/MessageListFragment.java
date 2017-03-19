@@ -1,109 +1,216 @@
 package cz.vspj.schrek.im.fragment.messages;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.google.firebase.database.*;
 import cz.vspj.schrek.im.R;
+import cz.vspj.schrek.im.activity.MainActivity;
+import cz.vspj.schrek.im.common.LoggedUser;
+import cz.vspj.schrek.im.fragment.messages.adapter.ConversationAdapter;
+import cz.vspj.schrek.im.model.Message;
+import cz.vspj.schrek.im.model.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MessageListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MessageListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class MessageListFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private DatabaseReference database;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    public MessageListFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MessageListFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MessageListFragment newInstance(String param1, String param2) {
-        MessageListFragment fragment = new MessageListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private List<Message> lastMessages = new ArrayList<>();
+    private TextView notFoundLabel;
+    private ListView listView;
+    private ConversationAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        adapter = new ConversationAdapter(getContext(), R.layout.friend_list_item, lastMessages);
+
+
+        fillLastMessagesList();
+
+    }
+
+    private void fillLastMessagesList() {
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                clearConversationList();
+                for (DataSnapshot conversation : dataSnapshot.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).getChildren()) {
+                    String friendUID = conversation.getKey();
+                    if (conversation.getChildrenCount() == 1) {
+                        DataSnapshot message = conversation.getChildren().iterator().next();
+                        Long timestamp = Long.parseLong(message.getKey());
+                        Message.Type messageType = Message.Type.getType((String) message.child("type").getValue());
+                        if (timestamp == Message.INITIAL_TIMPESTAMP && messageType == Message.Type.SYSTEM) {
+                            //find last message from friend post box
+                            addLastFromPostBoxes(dataSnapshot, friendUID, true);
+                        }
+                    } else {
+                        //find last message from both post boxes
+                        addLastFromPostBoxes(dataSnapshot, friendUID, false);
+                    }
+                }
+
+
+                database.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        fillLastMessagesList();
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+    }
+
+    private void clearConversationList() {
+        lastMessages.clear();
+        adapter.notifyDataSetChanged();
+    }
+
+    private void insertToCoversationList(Message msg) {
+        for (int i = 0; i < lastMessages.size(); i++) {
+            if (lastMessages.get(i).timestamp < msg.timestamp) {
+                lastMessages.add(i, msg);
+                updateConversationList();
+                return;
+            }
         }
+
+        lastMessages.add(msg);
+        updateConversationList();
+
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_message_list, container, false);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+    private void updateConversationList() {
+        if (!lastMessages.isEmpty()) {
+            notFoundLabel.setVisibility(View.GONE);
+            adapter.notifyDataSetChanged();
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            notFoundLabel.setVisibility(View.VISIBLE);
         }
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    private void findAtOwnBox(final DataSnapshot rootNode, final String friendUID, final Message friendMsg) {
+        rootNode.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).child(friendUID)
+                .getRef().orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String friendUsername = (String) rootNode.child("app").child("users").child(friendUID).child("info").child("username").getValue();
+                User from = new User(friendUID, friendUsername);
+                User to = LoggedUser.getCurrentUser();
+
+                DataSnapshot lastMsg = dataSnapshot.getChildren().iterator().next();
+
+                long timestamp = Long.parseLong(lastMsg.getKey().trim());
+                boolean read = ((Boolean) lastMsg.child("read").getValue()).booleanValue();
+                Message.Type type = Message.Type.getType((String) lastMsg.child("type").getValue());
+                String value = (String) lastMsg.child("value").getValue();
+
+                Message ownMsg = new Message(from, to, timestamp, read, type, value);
+
+                if (friendMsg.timestamp > ownMsg.timestamp) {
+                    insertToCoversationList(friendMsg);
+                } else {
+                    insertToCoversationList(ownMsg);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    private void addLastFromPostBoxes(final DataSnapshot rootNode, final String friendUID, final boolean initialMessage) {
+        rootNode.child("app").child("messages").child(friendUID).child(LoggedUser.getCurrentUser().uid)
+                .getRef().orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Message friendMsg = findAtFriendBox(dataSnapshot);
+
+                if (initialMessage) {
+                    insertToCoversationList(friendMsg);
+                } else {
+                    findAtOwnBox(rootNode, friendUID, friendMsg);
+                }
+            }
+
+            @NonNull
+            private Message findAtFriendBox(DataSnapshot dataSnapshot) {
+                String friendUsername = (String) rootNode.child("app").child("users").child(friendUID).child("info").child("username").getValue();
+                User from = LoggedUser.getCurrentUser();
+                User to = new User(friendUID, friendUsername);
+
+                DataSnapshot lastMsg = dataSnapshot.getChildren().iterator().next();
+
+                long timestamp = Long.parseLong(lastMsg.getKey().trim());
+                boolean read = ((Boolean) lastMsg.child("read").getValue()).booleanValue();
+                Message.Type type = Message.Type.getType((String) lastMsg.child("type").getValue());
+                String value = (String) lastMsg.child("value").getValue();
+
+                return new Message(from, to, timestamp, read, type, value);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.fragment_message_list, container, false);
+
+        notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
+
+        listView = (ListView) view.findViewById(R.id.messageList);
+        listView.setAdapter(adapter);
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Zprávy");
     }
 }

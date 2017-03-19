@@ -26,12 +26,14 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
 
     private DatabaseReference database;
 
-    private MainActivity mainActivity;
     private List<User> users;
 
     private TextView notFoundLabel;
     private EditText searchInput;
+
     private ListView listView;
+    private FriendsAdapter adapter;
+    private List<User> matches = new ArrayList<>();
 
 
     @Override
@@ -39,22 +41,21 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         super.onCreate(savedInstanceState);
         this.database = FirebaseDatabase.getInstance().getReference();
 
+        adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, matches, true);
+
         fillUserWithoutFirends(LoggedUser.getCurrentUser(), LoggedUser.getFriends());
-
-        mainActivity = (MainActivity) getActivity();
-        mainActivity.getSupportActionBar().setTitle("Vyhledavani pratel");
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_find_friends, container, false);
 
         searchInput = (EditText) view.findViewById(R.id.searchInput);
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
         searchInput = (EditText) view.findViewById(R.id.searchInput);
+
         listView = (ListView) view.findViewById(R.id.resultList);
+        listView.setAdapter(adapter);
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -78,7 +79,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
 
 
     public void filterUsers() {
-        List<User> matches = new ArrayList<User>();
+        matches.clear();
         if (users != null && !users.isEmpty() && !searchInput.getText().toString().isEmpty()) {
             for (User u : users) {
                 if (u.username.matches(".*" + searchInput.getText().toString() + ".*")) {
@@ -93,9 +94,9 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
             notFoundLabel.setVisibility(View.GONE);
         }
 
-        final FriendsAdapter adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, matches, true);
-        listView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        if (getContext() != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -132,6 +133,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Vyhledavani pratel");
         LoggedUser.addFriendChangeListener(this);
     }
 

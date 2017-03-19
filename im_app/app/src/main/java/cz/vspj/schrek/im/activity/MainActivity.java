@@ -1,6 +1,8 @@
 package cz.vspj.schrek.im.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -18,12 +20,15 @@ import android.view.MenuItem;
 import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ServerValue;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
+import cz.vspj.schrek.im.fragment.messages.MessageListFragment;
 import cz.vspj.schrek.im.model.User;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
 
     private FirebaseAuth firebaseAuth;
 
@@ -49,15 +54,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -66,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        replaceFragment(new MessageListFragment());
     }
 
     @Override
@@ -108,9 +106,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_messages) {
-            // Handle the camera action
+            replaceFragment(new MessageListFragment());
+        } else if (id == R.id.nav_groups) {
+
         } else if (id == R.id.nav_friends) {
-           replaceFragment(new FriendsListFragment());
+            replaceFragment(new FriendsListFragment());
         } else if (id == R.id.nav_subscribes) {
 
         } else if (id == R.id.nav_settings) {
@@ -147,5 +147,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (firebaseAuth != null) {
             firebaseAuth.removeAuthStateListener(authListener);
         }
+
     }
 }

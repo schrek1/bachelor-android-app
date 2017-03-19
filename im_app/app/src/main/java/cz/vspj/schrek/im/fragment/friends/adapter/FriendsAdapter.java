@@ -21,7 +21,6 @@ import java.util.List;
  */
 
 public class FriendsAdapter extends ArrayAdapter<User> {
-    private final Context context;
     private DatabaseReference databse;
     private User loggedUser;
 
@@ -30,7 +29,6 @@ public class FriendsAdapter extends ArrayAdapter<User> {
 
     public FriendsAdapter(Context context, int layoutItem, List<User> users, boolean addingMode) {
         super(context, layoutItem, users);
-        this.context = context;
         this.addingMode = addingMode;
         this.databse = FirebaseDatabase.getInstance().getReference();
         this.loggedUser = LoggedUser.getCurrentUser();
