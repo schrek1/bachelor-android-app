@@ -2,9 +2,11 @@ package cz.vspj.schrek.im.fragment.friends;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -44,6 +46,12 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, matches, true);
 
         fillUserWithoutFirends(LoggedUser.getCurrentUser(), LoggedUser.getFriends());
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
     }
 
     @Override
@@ -53,6 +61,11 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         searchInput = (EditText) view.findViewById(R.id.searchInput);
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
         searchInput = (EditText) view.findViewById(R.id.searchInput);
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
 
         listView = (ListView) view.findViewById(R.id.resultList);
         listView.setAdapter(adapter);
@@ -141,5 +154,14 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     public void onPause() {
         super.onPause();
         LoggedUser.removeFriendChangeListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(true);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
     }
 }
