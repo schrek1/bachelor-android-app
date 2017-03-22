@@ -17,14 +17,14 @@ import com.google.firebase.database.*;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
 import cz.vspj.schrek.im.common.LoggedUser;
-import cz.vspj.schrek.im.fragment.friends.adapter.FriendsAdapter;
+import cz.vspj.schrek.im.fragment.friends.adapter.UsersAdapter;
 import cz.vspj.schrek.im.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class FindFriendsFragment extends Fragment implements LoggedUser.FriendChangeListener {
+public class FindUsersFragment extends Fragment implements LoggedUser.FriendChangeListener {
 
     private DatabaseReference database;
 
@@ -34,7 +34,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     private EditText searchInput;
 
     private ListView listView;
-    private FriendsAdapter adapter;
+    private UsersAdapter adapter;
     private List<User> matches = new ArrayList<>();
 
 
@@ -43,7 +43,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         super.onCreate(savedInstanceState);
         this.database = FirebaseDatabase.getInstance().getReference();
 
-        adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, matches, true);
+        adapter = new UsersAdapter(getContext(), R.layout.user_list_item, matches, true);
 
         fillUserWithoutFirends(LoggedUser.getCurrentUser(), LoggedUser.getFriends());
         setHasOptionsMenu(true);
@@ -56,11 +56,10 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_find_friends, container, false);
+        final View view = inflater.inflate(R.layout.fragment_find_users, container, false);
 
         searchInput = (EditText) view.findViewById(R.id.searchInput);
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
-        searchInput = (EditText) view.findViewById(R.id.searchInput);
 
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showMenuIcon(false);
@@ -146,7 +145,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Vyhledavani pratel");
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Vyhledavání uživatelů");
         LoggedUser.addFriendChangeListener(this);
     }
 

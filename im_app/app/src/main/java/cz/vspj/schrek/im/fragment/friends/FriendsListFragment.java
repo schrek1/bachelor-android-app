@@ -5,14 +5,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.common.Utils;
-import cz.vspj.schrek.im.fragment.friends.adapter.FriendsAdapter;
+import cz.vspj.schrek.im.fragment.friends.adapter.UsersAdapter;
 import cz.vspj.schrek.im.model.User;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
     private TextView emptyLabel;
 
     private ListView listView;
-    private FriendsAdapter adapter;
+    private UsersAdapter adapter;
     private List<User> friends;
 
     @Override
@@ -40,7 +39,7 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
         view.findViewById(R.id.findFriends).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).pushFragment(new FindFriendsFragment());
+                ((MainActivity) getActivity()).pushFragment(new FindUsersFragment());
             }
         });
 
@@ -60,7 +59,7 @@ public class FriendsListFragment extends Fragment implements LoggedUser.FriendCh
         if (!friends.isEmpty()) {
             emptyLabel.setVisibility(View.GONE);
             this.friends = friends;
-            adapter = new FriendsAdapter(getContext(), R.layout.friend_list_item, friends, false);
+            adapter = new UsersAdapter(getContext(), R.layout.user_list_item, friends, false);
             listView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         } else {

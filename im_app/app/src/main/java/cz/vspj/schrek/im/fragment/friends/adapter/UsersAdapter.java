@@ -20,14 +20,14 @@ import java.util.List;
  * Created by schrek on 16.03.2017.
  */
 
-public class FriendsAdapter extends ArrayAdapter<User> {
+public class UsersAdapter extends ArrayAdapter<User> {
     private DatabaseReference databse;
     private User loggedUser;
 
     private boolean addingMode;
 
 
-    public FriendsAdapter(Context context, int layoutItem, List<User> users, boolean addingMode) {
+    public UsersAdapter(Context context, int layoutItem, List<User> users, boolean addingMode) {
         super(context, layoutItem, users);
         this.addingMode = addingMode;
         this.databse = FirebaseDatabase.getInstance().getReference();
@@ -36,7 +36,7 @@ public class FriendsAdapter extends ArrayAdapter<User> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View rowView = LayoutInflater.from(getContext()).inflate(R.layout.friend_list_item, parent, false);
+        View rowView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.email);
         textView.setText(getItem(position).username);
 

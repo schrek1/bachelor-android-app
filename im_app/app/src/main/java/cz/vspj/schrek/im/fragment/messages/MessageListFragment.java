@@ -34,10 +34,7 @@ public class MessageListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         database = FirebaseDatabase.getInstance().getReference();
-        adapter = new ConversationAdapter(getContext(), R.layout.friend_list_item, lastMessages);
-
-//        fillLastMessagesList();
-        setChangeListener();
+        adapter = new ConversationAdapter(getContext(), R.layout.user_list_item, lastMessages);
 
     }
 
@@ -192,6 +189,13 @@ public class MessageListFragment extends Fragment {
 
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
 
+        view.findViewById(R.id.sendMessage).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity) getActivity()).pushFragment(new FindFriendsFragment());
+            }
+        });
+
         listView = (ListView) view.findViewById(R.id.messageList);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -208,5 +212,6 @@ public class MessageListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Zprávy");
+        setChangeListener();
     }
 }
