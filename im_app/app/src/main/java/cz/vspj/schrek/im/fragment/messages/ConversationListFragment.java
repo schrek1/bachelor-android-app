@@ -1,7 +1,6 @@
 package cz.vspj.schrek.im.fragment.messages;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import com.google.firebase.database.*;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
 import cz.vspj.schrek.im.common.LoggedUser;
+import cz.vspj.schrek.im.common.Utils;
 import cz.vspj.schrek.im.fragment.messages.adapter.ConversationAdapter;
 import cz.vspj.schrek.im.model.Message;
 import cz.vspj.schrek.im.model.User;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MessageListFragment extends Fragment {
+public class ConversationListFragment extends Fragment {
     private DatabaseReference database;
 
     private List<Message> lastMessages = new ArrayList<>();
@@ -34,7 +34,7 @@ public class MessageListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         database = FirebaseDatabase.getInstance().getReference();
-        adapter = new ConversationAdapter(getContext(), R.layout.user_list_item, lastMessages);
+        adapter = new ConversationAdapter(getContext(), R.layout.conversation_list_item, lastMessages);
 
     }
 
@@ -65,38 +65,52 @@ public class MessageListFragment extends Fragment {
         });
     }
 
-    private void updateMessageList(DataSnapshot conversation) {
-        User friend = new User(conversation.getKey());
-        if (conversation.getChildrenCount() == 1) {
-            DataSnapshot message = conversation.getChildren().iterator().next();
-            Long timestamp = Long.parseLong(message.getKey());
-            Message.Type messageType = Message.Type.getType((String) message.child("type").getValue());
-            if (timestamp == Message.INITIAL_TIMPESTAMP && messageType == Message.Type.SYSTEM) {
-                //find last message from friend post box
-                findInFriendBox(friend, null);
+
+    private void updateMessageList(final DataSnapshot conversation) {
+        final String friendUid = conversation.getKey();
+        database.child("app").child("users").child(friendUid).child("info").child("username").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String username = (String) dataSnapshot.getValue();
+                User friend = new User(friendUid, username);
+                if (conversation.getChildrenCount() == 1) {
+                    DataSnapshot message = conversation.getChildren().iterator().next();
+                    Long timestamp = Long.parseLong(message.getKey());
+                    Message.Type messageType = Message.Type.getType((String) message.child("type").getValue());
+                    if (timestamp == Message.INITIAL_TIMPESTAMP && messageType == Message.Type.SYSTEM) {
+                        //find last message from friend post box
+                        findInFriendBox(friend, null);
+                    }
+                } else {
+                    //find last message from both post boxes
+                    Message toCurrentUserMsg = findInOwnBox(conversation, friend);
+                    findInFriendBox(friend, toCurrentUserMsg);
+                }
             }
-        } else {
-            //find last message from both post boxes
-            Message ownMsg = findInOwnBox(conversation, friend);
-            findInFriendBox(friend, ownMsg);
-        }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    private Message findInFriendBox(final User friend, final Message ownMsg) {
+
+    private Message findInFriendBox(final User friend, final Message toCurrentUserMsg) {
         database.child("app").child("messages").child(friend.uid).child(LoggedUser.getCurrentUser().uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 DataSnapshot newestNode = getLastMessage(dataSnapshot);
-                Message friendMsg = parseMessage(friend, LoggedUser.getCurrentUser(), newestNode);
+                Message toFriendMsg = Utils.parseMessage(LoggedUser.getCurrentUser(), friend, newestNode);
 
-                if (ownMsg != null) {
-                    if (ownMsg.timestamp > friendMsg.timestamp) {
-                        putToCoversationList(ownMsg);
+                if (toCurrentUserMsg != null) {
+                    if (toCurrentUserMsg.timestamp > toFriendMsg.timestamp) {
+                        putToCoversationList(toCurrentUserMsg);
                     } else {
-                        putToCoversationList(friendMsg);
+                        putToCoversationList(toFriendMsg);
                     }
                 } else {
-                    putToCoversationList(friendMsg);
+                    putToCoversationList(toFriendMsg);
                 }
             }
 
@@ -122,6 +136,7 @@ public class MessageListFragment extends Fragment {
         for (int i = 0; i < lastMessages.size(); i++) {
             if (lastMessages.get(i).timestamp < putMsg.timestamp) {
                 lastMessages.add(i, putMsg);
+                //pro zmeny pri odeslani zpravy
                 updateConversationList();
                 return;
             }
@@ -135,15 +150,16 @@ public class MessageListFragment extends Fragment {
     }
 
     private boolean compareMsgUsers(Message listMsg, Message putMsg) {
-        if ((listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.to)) ||
-                (listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.from)) ||
-                (listMsg.from.equals(putMsg.from) && listMsg.to.equals(LoggedUser.getCurrentUser())) ||
-                (listMsg.from.equals(putMsg.to) && listMsg.to.equals(LoggedUser.getCurrentUser()))
-                ) {
-            return true;
-        } else {
-            return false;
-        }
+//        if ((listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.to)) ||
+//                (listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.from)) ||
+//                (listMsg.from.equals(putMsg.from) && listMsg.to.equals(LoggedUser.getCurrentUser())) ||
+//                (listMsg.from.equals(putMsg.to) && listMsg.to.equals(LoggedUser.getCurrentUser()))
+//                ) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+        return listMsg.getFriend().equals(putMsg.getFriend());
     }
 
     private void updateConversationList() {
@@ -157,18 +173,9 @@ public class MessageListFragment extends Fragment {
 
     private Message findInOwnBox(final DataSnapshot conversationNode, final User friend) {
         DataSnapshot newestNode = getLastMessage(conversationNode);
-        return parseMessage(LoggedUser.getCurrentUser(), friend, newestNode);
+        return Utils.parseMessage(friend, LoggedUser.getCurrentUser(), newestNode);
     }
 
-    @NonNull
-    private Message parseMessage(User from, User to, DataSnapshot messageNode) {
-        long timestamp = Long.parseLong(messageNode.getKey().trim());
-        boolean read = ((Boolean) messageNode.child("read").getValue()).booleanValue();
-        Message.Type type = Message.Type.getType((String) messageNode.child("type").getValue());
-        String value = (String) messageNode.child("value").getValue();
-
-        return new Message(from, to, timestamp, read, type, value);
-    }
 
     private DataSnapshot getLastMessage(DataSnapshot conversationNode) {
         DataSnapshot newestNode = conversationNode.getChildren().iterator().next();
@@ -185,7 +192,7 @@ public class MessageListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_message_list, container, false);
+        final View view = inflater.inflate(R.layout.fragment_conversation_list, container, false);
 
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
 
@@ -200,8 +207,10 @@ public class MessageListFragment extends Fragment {
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ((MainActivity) getActivity()).pushFragment(ConversationFragment.newInstance(null));
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Message msg = adapter.getItem(position);
+                User friend = msg.getFriend();
+                ((MainActivity) getActivity()).pushFragment(MessagingFragment.newInstance(friend));
             }
         });
 

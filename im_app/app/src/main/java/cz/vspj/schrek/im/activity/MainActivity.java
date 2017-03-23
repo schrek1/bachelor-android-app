@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
-import cz.vspj.schrek.im.fragment.messages.MessageListFragment;
+import cz.vspj.schrek.im.fragment.messages.ConversationListFragment;
 import cz.vspj.schrek.im.model.User;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         createDefaultToolbar();
 
-        replaceFragment(new MessageListFragment());
+        replaceFragment(new ConversationListFragment());
     }
 
     public void createDefaultToolbar() {
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_messages) {
-            replaceFragment(new MessageListFragment());
+            replaceFragment(new ConversationListFragment());
         } else if (id == R.id.nav_groups) {
 
         } else if (id == R.id.nav_friends) {

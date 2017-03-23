@@ -28,12 +28,24 @@ public class Message {
     }
 
 
-    public User getReciever() {
+    public User getFriend() {
         if (from.equals(LoggedUser.getCurrentUser())) {
             return to;
         } else {
             return from;
         }
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        Message msg = (Message) obj;
+        if (timestamp == msg.timestamp) {
+            if (from.equals(msg.from) && to.equals(msg.to) && value.equals(msg.value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public enum Type {
@@ -59,4 +71,6 @@ public class Message {
         }
 
     }
+
+
 }

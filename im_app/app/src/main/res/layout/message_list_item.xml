@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <LinearLayout
+            android:id="@+id/friendMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+    >
+        <TextView
+                android:id="@+id/friend_timestamp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="17:45"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:visibility="gone"
+        />
+
+        <TextView
+                android:id="@+id/friend_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dummy username"
+                android:textSize="16dp"
+                android:background="#d3d3d3"
+                android:padding="7dp"
+        />
+        <TextView
+                android:id="@+id/friend_read_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Precteno"
+                android:textSize="11dp"
+                android:textAlignment="textStart"
+                android:visibility="gone"
+        />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/ownMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="vertical"
+            android:gravity="right"
+            android:visibility="gone"
+    >
+
+        <TextView
+                android:id="@+id/own_timestamp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="17:45"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:visibility="gone"
+        />
+
+        <TextView
+                android:id="@+id/own_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dummy username"
+                android:textSize="16dp"
+                android:background="?attr/colorPrimary"
+                android:padding="7dp"
+                android:textColor="#ffffff"
+
+        />
+        <TextView
+                android:id="@+id/own_read_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Precteno"
+                android:textSize="11dp"
+                android:textAlignment="textEnd"
+                android:visibility="gone"
+        />
+
+
+    </LinearLayout>
+
+</RelativeLayout>

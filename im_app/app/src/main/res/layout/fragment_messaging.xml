@@ -2,12 +2,16 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="cz.vspj.schrek.im.fragment.messages.ConversationFragment">
+                tools:context="cz.vspj.schrek.im.fragment.messages.MessagingFragment">
 
     <ListView android:id="@+id/messageList"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:layout_above="@+id/bottomContainer"
+              android:transcriptMode="alwaysScroll"
+              android:stackFromBottom="true"
+              android:divider="@null"
+              android:listSelector="@android:color/transparent"
     />
 
     <TextView android:layout_width="match_parent"

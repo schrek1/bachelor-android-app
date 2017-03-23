@@ -16,21 +16,6 @@ public class User implements Serializable {
 
     public User(String uid) {
         this.uid = uid;
-        obtainUsername(this.uid);
-    }
-
-    private void obtainUsername(String uid) {
-        database.child("app").child("users").child(uid).child("info").child("username").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                username = (String) dataSnapshot.getValue();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     public User(String uid, String username) {

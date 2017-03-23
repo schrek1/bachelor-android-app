@@ -6,6 +6,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import cz.vspj.schrek.im.model.Message;
+import cz.vspj.schrek.im.model.User;
 
 /**
  * Created by schrek on 10.03.2017.
@@ -34,4 +37,19 @@ public class Utils {
         };
     }
 
+
+    @NonNull
+    public static Message parseMessage(User from, User to, DataSnapshot messageNode) {
+        long timestamp = Long.parseLong(messageNode.getKey().trim());
+        boolean read;
+        if (messageNode.child("read").getValue() instanceof Boolean) {
+            read = ((Boolean) messageNode.child("read").getValue()).booleanValue();
+        } else {
+            read = Boolean.parseBoolean((String) messageNode.child("read").getValue());
+        }
+        Message.Type type = Message.Type.getType((String) messageNode.child("type").getValue());
+        String value = (String) messageNode.child("value").getValue();
+
+        return new Message(from, to, timestamp, read, type, value);
+    }
 }
