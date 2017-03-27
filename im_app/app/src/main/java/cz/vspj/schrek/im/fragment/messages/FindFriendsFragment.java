@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -59,13 +60,20 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
         searchInput = (EditText) view.findViewById(R.id.searchInput);
 
-        MainActivity mainActivity = (MainActivity) getActivity();
+        final MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showMenuIcon(false);
         ActionBar actionBar = mainActivity.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(false);
 
         listView = (ListView) view.findViewById(R.id.resultList);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                User friend = adapter.getItem(position);
+                mainActivity.pushFragment(MessagingFragment.newInstance(friend));
+            }
+        });
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override

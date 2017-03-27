@@ -1,14 +1,19 @@
 package cz.vspj.schrek.im.fragment.messages;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.*;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
@@ -20,6 +25,7 @@ import cz.vspj.schrek.im.model.Message;
 import cz.vspj.schrek.im.model.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -32,6 +38,8 @@ public class MessagingFragment extends Fragment {
     private List<Message> messages = new ArrayList<>();
 
     private TextView notFoundLabel;
+    private Button sendButton;
+    private EditText textInput;
 
     private ListView listView;
     private MessagesAdapter adapter;
@@ -83,6 +91,10 @@ public class MessagingFragment extends Fragment {
         actionBar.setDisplayShowCustomEnabled(true);
 
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
+        textInput = (EditText) view.findViewById(R.id.textInput);
+        sendButton = (Button) view.findViewById(R.id.sendButton);
+        sendButton.setOnClickListener(sendButtonClickListener);
+
         listView = (ListView) view.findViewById(R.id.messageList);
         listView.setAdapter(adapter);
 
@@ -159,6 +171,54 @@ public class MessagingFragment extends Fragment {
         removeMessageListeners();
     }
 
+
+    private View.OnClickListener sendButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (!textInput.getText().toString().isEmpty()) {
+                database.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.hasChild(friend.uid)) {
+                            DatabaseReference reference = dataSnapshot.child(friend.uid).child("-1").getRef();
+                            HashMap<String, Object> result = new HashMap<>();
+                            result.put("type", "system");
+                            result.put("value", "start_coversation");
+                            reference.setValue(result);
+                        }
+
+                        database.child("temp").child(LoggedUser.getCurrentUser().uid).child("timestamp").setValue(ServerValue.TIMESTAMP);
+                        database.child("temp").child(LoggedUser.getCurrentUser().uid).child("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Long timestamp = (Long) dataSnapshot.getValue() / 1000;
+                                DatabaseReference reference = database.child("app").child("messages").child(friend.uid).child(LoggedUser.getCurrentUser().uid).child(timestamp.toString());
+
+                                HashMap<String, Object> result = new HashMap<>();
+                                result.put("read", false);
+                                result.put("type", "text");
+                                result.put("value", textInput.getText().toString());
+                                reference.setValue(result);
+
+                                database.child("temp").child(LoggedUser.getCurrentUser().uid).removeValue();
+                                textInput.setText("");
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
+    };
 
     private ChildEventListener currentUserListener = new ChildEventListener() {
         @Override
