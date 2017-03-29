@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else if (id == R.id.nav_friends) {
             replaceFragment(new FriendsListFragment());
-        } else if (id == R.id.nav_subscribes) {
+        } else if (id == R.id.nav_meetups) {
 
         } else if (id == R.id.nav_settings) {
 

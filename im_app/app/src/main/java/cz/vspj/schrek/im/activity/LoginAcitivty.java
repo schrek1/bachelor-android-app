@@ -58,14 +58,18 @@ public class LoginAcitivty extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signInWithEmailAndPassword(username.getText().toString().trim(), password.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Přihlášení se nezdařilo", Toast.LENGTH_SHORT).show();
+                if (username != null && !username.getText().toString().isEmpty() && password != null && !password.getText().toString().isEmpty()) {
+                    firebaseAuth.signInWithEmailAndPassword(username.getText().toString().trim(), password.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), "Přihlášení se nezdařilo", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    Toast.makeText(getApplicationContext(), "Vyplňte všechny údaje", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
