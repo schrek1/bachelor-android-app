@@ -80,6 +80,9 @@ public class ConversationListFragment extends Fragment {
                     if (timestamp == Message.INITIAL_TIMPESTAMP && messageType == Message.Type.SYSTEM) {
                         //find last message from friend post box
                         findInFriendBox(friend, null);
+                    } else {
+                        Message toCurrentUserMsg = findInOwnBox(conversation, friend);
+                        putToCoversationList(toCurrentUserMsg);
                     }
                 } else {
                     //find last message from both post boxes

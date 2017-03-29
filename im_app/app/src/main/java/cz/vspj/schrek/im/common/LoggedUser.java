@@ -1,6 +1,8 @@
 package cz.vspj.schrek.im.common;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.*;
+import com.google.firebase.iid.FirebaseInstanceId;
 import cz.vspj.schrek.im.model.User;
 
 import java.util.ArrayList;
@@ -34,6 +36,14 @@ public class LoggedUser {
         loggedUser = user;
         updateFriendList(user);
         setFirendsChangeListener(user);
+        updateInstanceId();
+    }
+
+    private static void updateInstanceId() {
+        String instanceId = FirebaseInstanceId.getInstance().getToken();
+        if (instanceId != null && !instanceId.isEmpty()) {
+            database.child("app").child("users").child(LoggedUser.getCurrentUser().uid).child("info").child("instanceId").setValue(instanceId);
+        }
     }
 
     public static List<User> getFriends() {
