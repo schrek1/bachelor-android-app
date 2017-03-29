@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
+import cz.vspj.schrek.im.fragment.meetups.MeetupsListFragment;
 import cz.vspj.schrek.im.fragment.messages.ConversationListFragment;
 import cz.vspj.schrek.im.model.User;
 
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_friends) {
             replaceFragment(new FriendsListFragment());
         } else if (id == R.id.nav_meetups) {
-
+            replaceFragment(new MeetupsListFragment());
         } else if (id == R.id.nav_settings) {
 
         }
