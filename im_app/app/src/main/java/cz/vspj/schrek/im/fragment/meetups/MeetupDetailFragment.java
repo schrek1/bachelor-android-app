@@ -7,18 +7,41 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
+import cz.vspj.schrek.im.fragment.messages.MessagingFragment;
+import cz.vspj.schrek.im.model.Meetup;
+import cz.vspj.schrek.im.model.Message;
+import cz.vspj.schrek.im.model.User;
 
 /**
  * Created by schrek on 29.03.2017.
  */
 
-public class MeetupDetailFragment  extends Fragment{
+public class MeetupDetailFragment extends Fragment {
+    private static final String ARG_MEETUP = "meetup";
+
+    public static MeetupDetailFragment newInstance(Meetup meetup) {
+        MeetupDetailFragment fragment = new MeetupDetailFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_MEETUP, meetup);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    private Meetup meetup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            meetup = (Meetup) getArguments().getSerializable(ARG_MEETUP);
+        }
+
         setHasOptionsMenu(true);
     }
 
@@ -35,6 +58,16 @@ public class MeetupDetailFragment  extends Fragment{
         mainActivity.showMenuIcon(false);
         ActionBar actionBar = mainActivity.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(false);
+
+        ((TextView) view.findViewById(R.id.meetup_title)).setText(meetup.title);
+        ((TextView) view.findViewById(R.id.meetup_message)).setText(meetup.message);
+        String[] term = meetup.term.split(" ");
+        ((TextView) view.findViewById(R.id.meetup_date)).setText(term[0]);
+        ((TextView) view.findViewById(R.id.meetup_time)).setText(term[1]);
+
+        ListView listView = (ListView) view.findViewById(R.id.meetup_invites);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, meetup.invitedUsers.toArray(new String[meetup.invitedUsers.size()]));
+        listView.setAdapter(adapter);
 
         return view;
     }

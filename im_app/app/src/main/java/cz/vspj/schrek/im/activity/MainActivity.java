@@ -14,8 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
@@ -23,10 +26,12 @@ import cz.vspj.schrek.im.fragment.meetups.MeetupsListFragment;
 import cz.vspj.schrek.im.fragment.messages.ConversationListFragment;
 import cz.vspj.schrek.im.model.User;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth firebaseAuth;
-
     private ActionBarDrawerToggle actionBar;
 
     private FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
@@ -98,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (R.id.action_logout == id) {
+            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+            dbRef.child("app").child("users").child(LoggedUser.getCurrentUser().uid).child("info").child("instanceId").removeValue();
             firebaseAuth.signOut();
             return true;
         }
@@ -127,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     public void replaceFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();

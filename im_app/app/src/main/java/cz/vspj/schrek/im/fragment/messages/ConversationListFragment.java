@@ -153,15 +153,6 @@ public class ConversationListFragment extends Fragment {
     }
 
     private boolean compareMsgUsers(Message listMsg, Message putMsg) {
-//        if ((listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.to)) ||
-//                (listMsg.from.equals(LoggedUser.getCurrentUser()) && listMsg.to.equals(putMsg.from)) ||
-//                (listMsg.from.equals(putMsg.from) && listMsg.to.equals(LoggedUser.getCurrentUser())) ||
-//                (listMsg.from.equals(putMsg.to) && listMsg.to.equals(LoggedUser.getCurrentUser()))
-//                ) {
-//            return true;
-//        } else {
-//            return false;
-//        }
         return listMsg.getFriend().equals(putMsg.getFriend());
     }
 
