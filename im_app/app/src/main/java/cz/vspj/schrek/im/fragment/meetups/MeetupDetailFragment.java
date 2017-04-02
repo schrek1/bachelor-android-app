@@ -81,13 +81,24 @@ public class MeetupDetailFragment extends Fragment {
         actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
-
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
+        setDefaultToolbar();
+    }
+
+    private void setDefaultToolbar() {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showMenuIcon(true);
         ActionBar actionBar = mainActivity.getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setCustomView(null);
+        mainActivity.createDefaultToolbar();
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 }

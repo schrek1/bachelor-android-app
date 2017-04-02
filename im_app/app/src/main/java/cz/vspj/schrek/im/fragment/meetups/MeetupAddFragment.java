@@ -170,11 +170,23 @@ public class MeetupAddFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        setDefaultToolbar();
+    }
+
+    private void setDefaultToolbar() {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showMenuIcon(true);
         ActionBar actionBar = mainActivity.getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setCustomView(null);
+        mainActivity.createDefaultToolbar();
     }
+
 
 
     Calendar pickerDate = Calendar.getInstance();
