@@ -140,10 +140,22 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     public void onPause() {
         super.onPause();
         LoggedUser.removeFriendChangeListener(this);
+        setDefaultToolbar();
+    }
+
+    private void setDefaultToolbar() {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(true);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setCustomView(null);
+        mainActivity.createDefaultToolbar();
     }
 
     @Override
     public void onStop() {
         super.onStop();
     }
+
+
 }
