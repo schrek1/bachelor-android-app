@@ -54,11 +54,6 @@ public class MeetupAddFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_meetup_add, container, false);
 
-        final MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(false);
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
-
         dateInput = (EditText) view.findViewById(R.id.meetup_date);
         dateInput.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +156,14 @@ public class MeetupAddFragment extends Fragment {
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Přidat schůzku");
+        setCustomToolbar();
+    }
+
+    private void setCustomToolbar() {
+        final MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
 

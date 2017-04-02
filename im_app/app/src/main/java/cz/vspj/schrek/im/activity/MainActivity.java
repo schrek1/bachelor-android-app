@@ -12,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -21,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.common.LoggedUser;
+import cz.vspj.schrek.im.common.Utils;
 import cz.vspj.schrek.im.fragment.friends.FriendsListFragment;
 import cz.vspj.schrek.im.fragment.meetups.MeetupsListFragment;
 import cz.vspj.schrek.im.fragment.messages.ConversationListFragment;
@@ -105,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (R.id.action_logout == id) {
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
             dbRef.child("app").child("users").child(LoggedUser.getCurrentUser().uid).child("info").child("instanceId").removeValue();
+            Utils.setUserOfflineState(LoggedUser.getCurrentUser().uid);
             firebaseAuth.signOut();
             return true;
         }
@@ -154,6 +157,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction.commit();
     }
 
+    public void popBackStack() {
+        getSupportFragmentManager().popBackStack();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -166,6 +173,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (firebaseAuth != null) {
             firebaseAuth.removeAuthStateListener(authListener);
         }
-
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Utils.setUserOnlineState(LoggedUser.getCurrentUser().uid);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Utils.setUserOfflineState(LoggedUser.getCurrentUser().uid);
+    }
+
+
 }

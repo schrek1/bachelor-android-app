@@ -40,6 +40,7 @@ public class MessagingFragment extends Fragment {
     private TextView notFoundLabel;
     private Button sendButton;
     private EditText textInput;
+    private View customBar;
 
     private ListView listView;
     private MessagesAdapter adapter;
@@ -78,17 +79,75 @@ public class MessagingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_messaging, container, false);
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(false);
+        customBar = LayoutInflater.from(getContext()).inflate(R.layout.messaging_toolbar, null);
+        ((TextView) customBar.findViewById(R.id.username_label)).setText(friend.getName());
+        final TextView friendSatusLabel = (TextView) customBar.findViewById(R.id.status_label);
 
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
-        actionBar.setDisplayShowTitleEnabled(false);
+        database.child("app").child("users").child(friend.uid).child("info").child("status").addChildEventListener(new ChildEventListener() {
+            private void changeSatus() {
+                database.child("app").child("users").child(friend.uid).child("info").child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(final DataSnapshot statusSnapshot) {
+                        String state = (String) statusSnapshot.child("state").getValue();
 
-        View customBar = LayoutInflater.from(getContext()).inflate(R.layout.messaging_toolbar, null);
+                        if ("online".equals(state)) {
+                            friendSatusLabel.setText("Online");
+                        } else if ("offline".equals(state)) {
+                            database.child("temp").child("messagingFragment").child(LoggedUser.getCurrentUser().uid).child("nowTimestamp").setValue(ServerValue.TIMESTAMP);
+                            database.child("temp").child("messagingFragment").child(LoggedUser.getCurrentUser().uid).child("nowTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot timeSnapshot) {
+                                    Long lastTimestamp = (Long) statusSnapshot.child("lastUpdate").getValue();
+                                    Long actualTimestamp = (Long) timeSnapshot.getValue();
+                                    String lastActivity = Utils.lastActive(lastTimestamp, actualTimestamp);
+                                    friendSatusLabel.setText("Aktivní před " + lastActivity);
+                                    database.child("temp").child("messagingFragment").child(LoggedUser.getCurrentUser().uid).child("nowTimestamp").removeValue();
+                                }
 
-        actionBar.setCustomView(customBar);
-        actionBar.setDisplayShowCustomEnabled(true);
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }
+
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                changeSatus();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                changeSatus();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        setCustomToolbar(customBar);
 
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
         textInput = (EditText) view.findViewById(R.id.textInput);
@@ -101,6 +160,18 @@ public class MessagingFragment extends Fragment {
         return view;
     }
 
+    private void setCustomToolbar(View customBar) {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+
+        actionBar.setCustomView(customBar);
+        actionBar.setDisplayShowCustomEnabled(true);
+    }
+
 
     private void setChangeListener() {
         database.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).child(friend.uid).addChildEventListener(currentUserListener);
@@ -110,6 +181,12 @@ public class MessagingFragment extends Fragment {
     private void removeMessageListeners() {
         database.child("app").child("messages").child(LoggedUser.getCurrentUser().uid).child(friend.uid).removeEventListener(currentUserListener);
         database.child("app").child("messages").child(friend.uid).child(LoggedUser.getCurrentUser().uid).removeEventListener(friendListener);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setCustomToolbar(customBar);
     }
 
     private void updateMessageList(User from, User to, DataSnapshot messageNode) {
@@ -200,7 +277,7 @@ public class MessagingFragment extends Fragment {
                                 result.put("value", textInput.getText().toString());
                                 reference.setValue(result);
 
-                                database.child("temp").child(LoggedUser.getCurrentUser().uid).removeValue();
+                                database.child("temp").child(LoggedUser.getCurrentUser().uid).child("timestamp").removeValue();
                                 textInput.setText("");
                             }
 

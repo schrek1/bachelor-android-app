@@ -16,7 +16,6 @@ import android.widget.TextView;
 import cz.vspj.schrek.im.R;
 import cz.vspj.schrek.im.activity.MainActivity;
 import cz.vspj.schrek.im.common.LoggedUser;
-import cz.vspj.schrek.im.fragment.friends.adapter.UsersAdapter;
 import cz.vspj.schrek.im.fragment.messages.adapter.FriendAdapter;
 import cz.vspj.schrek.im.model.User;
 
@@ -61,9 +60,8 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         searchInput = (EditText) view.findViewById(R.id.searchInput);
 
         final MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(false);
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
+
+        setCustomToolbar();
 
         listView = (ListView) view.findViewById(R.id.resultList);
         listView.setAdapter(adapter);
@@ -71,6 +69,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 User friend = adapter.getItem(position);
+                mainActivity.popBackStack();
                 mainActivity.pushFragment(MessagingFragment.newInstance(friend));
             }
         });
@@ -92,6 +91,13 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         });
 
         return view;
+    }
+
+    private void setCustomToolbar() {
+        final MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
 
@@ -127,6 +133,7 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
         super.onResume();
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Vyhledavání přátel");
         LoggedUser.addFriendChangeListener(this);
+        setCustomToolbar();
     }
 
     @Override
@@ -138,9 +145,5 @@ public class FindFriendsFragment extends Fragment implements LoggedUser.FriendCh
     @Override
     public void onStop() {
         super.onStop();
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(true);
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(true);
     }
 }

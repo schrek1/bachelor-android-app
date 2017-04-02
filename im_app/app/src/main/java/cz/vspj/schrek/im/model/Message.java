@@ -14,6 +14,8 @@ public class Message {
 
     public long timestamp;
 
+    public String formatedDate;
+
     public boolean read;
     public Message.Type type;
     public String value;

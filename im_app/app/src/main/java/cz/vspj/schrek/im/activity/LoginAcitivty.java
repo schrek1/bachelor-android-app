@@ -14,8 +14,10 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import cz.vspj.schrek.im.R;
+import cz.vspj.schrek.im.common.Utils;
 
 public class LoginAcitivty extends AppCompatActivity {
 
@@ -26,6 +28,7 @@ public class LoginAcitivty extends AppCompatActivity {
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
+                Utils.setUserOnlineState(user.getUid());
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
             }

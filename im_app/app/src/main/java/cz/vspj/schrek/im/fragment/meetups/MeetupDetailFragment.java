@@ -54,11 +54,6 @@ public class MeetupDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_meetup_detail, container, false);
 
-        final MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(false);
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
-
         ((TextView) view.findViewById(R.id.meetup_title)).setText(meetup.title);
         ((TextView) view.findViewById(R.id.meetup_message)).setText(meetup.message);
         String[] term = meetup.term.split(" ");
@@ -76,6 +71,14 @@ public class MeetupDetailFragment extends Fragment {
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Detail schůzky");
+        setCustomToolbar();
+    }
+
+    private void setCustomToolbar() {
+        final MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
 

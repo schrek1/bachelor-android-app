@@ -61,11 +61,6 @@ public class FindUsersFragment extends Fragment implements LoggedUser.FriendChan
         searchInput = (EditText) view.findViewById(R.id.searchInput);
         notFoundLabel = (TextView) view.findViewById(R.id.notFoundLabel);
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.showMenuIcon(false);
-        ActionBar actionBar = mainActivity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
-
         listView = (ListView) view.findViewById(R.id.resultList);
         listView.setAdapter(adapter);
 
@@ -142,11 +137,19 @@ public class FindUsersFragment extends Fragment implements LoggedUser.FriendChan
 
     }
 
+    private void setCustomToolbar(){
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showMenuIcon(false);
+        ActionBar actionBar = mainActivity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Vyhledavání uživatelů");
         LoggedUser.addFriendChangeListener(this);
+        setCustomToolbar();
     }
 
     @Override
