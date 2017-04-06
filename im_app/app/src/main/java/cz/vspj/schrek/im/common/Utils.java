@@ -81,7 +81,7 @@ public class Utils {
     }
 
     public static String lastActive(long lastTimestamp, long actualTimestamp) {
-        Long diffSeconds = (actualTimestamp - lastTimestamp) / 1000;
+        long diffSeconds = (actualTimestamp - lastTimestamp) / 1000;
 
         if (diffSeconds < 60) {
             //mene nez minuta
@@ -92,11 +92,11 @@ public class Utils {
             return minutes + " minutami";
         } else if (diffSeconds < 86_400) {
             //mene nez den
-            Long hours = diffSeconds / 360;
+            Long hours = diffSeconds / 3600;
             return hours + " hodinami";
         } else if (diffSeconds < 604_800) {
             //mene nez tyden
-            Long days = diffSeconds / (360 * 24);
+            Long days = diffSeconds / (3600 * 24);
             return days + " dny";
         } else {
             //vice nez 7 dni
