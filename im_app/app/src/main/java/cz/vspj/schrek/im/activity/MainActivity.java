@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (R.id.action_logout == id) {
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-            dbRef.child("app").child("users").child(LoggedUser.getCurrentUser().uid).child("info").child("instanceId").removeValue();
+//            dbRef.child("app").child("users").child(LoggedUser.getCurrentUser().uid).child("info").child("instanceId").removeValue();
             Utils.setUserOfflineState(LoggedUser.getCurrentUser().uid);
             firebaseAuth.signOut();
             return true;

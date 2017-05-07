@@ -131,9 +131,12 @@ public class MeetupAddFragment extends Fragment {
                                 put(user.uid, instanceId);
                             }
                         }});
-                        result.put("message", messageInput.getText().toString());
-                        result.put("time", dateInput.getText().toString() + " " + timeInput.getText().toString());
-                        result.put("title", titleInput.getText().toString());
+                        String message = messageInput.getText().toString();
+                        result.put("message", (message == null || message.isEmpty() ? "-" : message));
+                        String time = dateInput.getText().toString() + " " + timeInput.getText().toString();
+                        result.put("time", (time == null || time.isEmpty() ? "" : time));
+                        String title = titleInput.getText().toString();
+                        result.put("title", (title == null || title.isEmpty() ? "-" : title));
                         result.put("type", "meetup");
 
                         db.child("app").child("notifications").push().setValue(result);
@@ -188,7 +191,6 @@ public class MeetupAddFragment extends Fragment {
     }
 
 
-
     Calendar pickerDate = Calendar.getInstance();
 
     DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -215,7 +217,11 @@ public class MeetupAddFragment extends Fragment {
             pickerTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
             pickerTime.set(Calendar.MINUTE, minute);
 
-            timeInput.setText(hourOfDay + ":" + minute);
+            if (minute < 10) {
+                timeInput.setText(hourOfDay + ":0" + minute);
+            } else {
+                timeInput.setText(hourOfDay + ":" + minute);
+            }
         }
     };
 

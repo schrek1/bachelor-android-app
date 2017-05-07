@@ -27,7 +27,7 @@ public class LoginAcitivty extends AppCompatActivity {
         @Override
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
             FirebaseUser user = firebaseAuth.getCurrentUser();
-            if (user != null) {
+            if (null != user) {
                 Utils.setUserOnlineState(user.getUid());
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();

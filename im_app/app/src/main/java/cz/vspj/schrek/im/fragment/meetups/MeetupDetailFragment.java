@@ -56,10 +56,11 @@ public class MeetupDetailFragment extends Fragment {
 
         ((TextView) view.findViewById(R.id.meetup_title)).setText(meetup.title);
         ((TextView) view.findViewById(R.id.meetup_message)).setText(meetup.message);
-        String[] term = meetup.term.split(" ");
-        ((TextView) view.findViewById(R.id.meetup_date)).setText(term[0]);
-        ((TextView) view.findViewById(R.id.meetup_time)).setText(term[1]);
-
+        if (meetup.term != null && !meetup.term.trim().isEmpty()) {
+            String[] term = meetup.term.split(" ");
+            ((TextView) view.findViewById(R.id.meetup_date)).setText(term[0]);
+            ((TextView) view.findViewById(R.id.meetup_time)).setText(term[1]);
+        }
         ListView listView = (ListView) view.findViewById(R.id.meetup_invites);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, meetup.invitedUsers.toArray(new String[meetup.invitedUsers.size()]));
         listView.setAdapter(adapter);
